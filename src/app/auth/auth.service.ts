@@ -31,6 +31,7 @@ export class AuthService {
     this.http = http;
     this.stomp = stomp;
     this.router = router;
+    this.isAuthorized = this.token !== null;
   }
 
   get<T>(url: string): Promise<T> {

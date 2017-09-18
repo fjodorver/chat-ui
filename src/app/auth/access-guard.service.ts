@@ -12,7 +12,6 @@ export class AccessGuardService implements CanActivate {
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    console.log(this.authService.isAuthorized);
-    return true;
+    return this.authService.isAuthorized;
   }
 }

@@ -31,7 +31,7 @@ export class AuthService {
     this.http = http;
     this.stomp = stomp;
     this.router = router;
-    this.isAuthorized = this.token !== null;
+    this.isAuthorized = this.token !== undefined;
   }
 
   get<T>(url: string): Promise<T> {
@@ -76,8 +76,8 @@ export class AuthService {
     });
     await this.stomp.disconnect();
     await this.http.delete(url, {headers: headers, responseType: 'text'}).toPromise();
-    this.token = null;
     this.isAuthorized = false;
+    localStorage.clear();
     this.router.navigate(['/']);
   }
 }

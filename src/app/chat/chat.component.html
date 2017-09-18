@@ -1,0 +1,19 @@
+<div #list class="msg-list" [scrollTop]="list.scrollHeight" fxFlex="80%">
+  <md-list>
+    <md-list-item *ngFor="let it of messages">
+      <p>{{it.user.username}}: {{it.content}}</p>
+    </md-list-item>
+  </md-list>
+</div>
+<div #userList class="msg-list" [scrollTop]="userList.scrollHeight" fxFlex="20%">
+  <md-list>
+    <md-list-item *ngFor="let it of users">
+      <p>{{it.username}}</p>
+    </md-list-item>
+  </md-list>
+</div>
+<form class="form" (ngSubmit)="onSend(f)" #f="ngForm">
+  <md-form-field fxFlex="100%">
+    <input name="message" autocomplete="off" mdInput ngModel placeholder="Message">
+  </md-form-field>
+</form>

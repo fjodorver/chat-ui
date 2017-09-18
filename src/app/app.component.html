@@ -1,1 +1,15 @@
-<app-signin></app-signin>
+<md-sidenav>
+  <md-toolbar color="primary">
+    <span class="fill-space">Chat</span>
+    <button md-icon-button *ngIf="isAuthenticated" [mdMenuTriggerFor]="appMenu">
+      <md-icon>account_circle</md-icon>
+    </button>
+  </md-toolbar>
+  <md-sidenav-container>
+    <router-outlet></router-outlet>
+  </md-sidenav-container>
+</md-sidenav>
+<md-menu #appMenu="mdMenu">
+  <button md-menu-item> Profile </button>
+  <button md-menu-item (click)="signOut()"> Logout </button>
+</md-menu>

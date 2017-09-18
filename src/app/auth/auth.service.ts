@@ -1,31 +1,57 @@
-import { Injectable, InjectionToken } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/first';
+import 'rxjs/add/operator/toPromise';
+import {UserModel} from './user.model';
+import {Router} from '@angular/router';
+import {StompService} from 'ng2-stomp-service';
+
+type Token = string | null;
+
+export class Store {
+  private constructor() {
+  }
+
+  static set accessToken(value: Token) {
+    localStorage.access_token = value;
+  }
+
+  static get accessToken(): Token {
+    return localStorage.access_token;
+  }
+
+  static get isAuthenticated(): boolean {
+    return localStorage.length > 0;
+  }
+}
+
+const TOKEN_URL = 'http://localhost:8080/oauth/token';
 
 @Injectable()
 export class AuthService {
 
-  public get accessToken(): string {
-    return localStorage.access_token;
+  constructor(private readonly httpClient: HttpClient, private readonly stomp: StompService, private readonly router: Router) {
   }
 
-  public set accessToken(value: string) {
-    localStorage.access_token = value
+  signUp(user: UserModel): Promise<any> {
+    const url = 'http://localhost:8080/signup';
+    return this.httpClient.post(url, user).toPromise();
   }
 
-  constructor(private readonly httpClient: HttpClient) { }
-
-  signIn(username: string, password: string) {
-    new InjectionToken("test")
-    const url = 'http://localhost:8080/oauth/token'
+  signIn(user: UserModel): Promise<string> {
     const httpParams = new HttpParams()
       .append('grant_type', 'password')
-      .append('username', 'password')
-      .append('password', 'password')
-    this.httpClient.post(url, null, { params: httpParams })
-      .first()
+      .append('username', user.username)
+      .append('password', user.password);
+    return this.httpClient.post(TOKEN_URL, null, {params: httpParams})
       .map(it => it['access_token'])
-      .subscribe(it => this.accessToken = it)
+      .toPromise();
+  }
+
+  async signOut() {
+    await this.httpClient.delete(TOKEN_URL, { responseType: 'text' }).toPromise();
+    localStorage.clear();
+    await this.stomp.disconnect();
+    await this.router.navigate(['/']);
   }
 }

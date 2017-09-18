@@ -1,0 +1,11 @@
+.form {
+  position: fixed;
+  width: 100%;
+  bottom: 10px;
+  z-index: 99;
+}
+
+.msg-list {
+  overflow-y: scroll;
+  height: calc(100vh - 200px);
+}

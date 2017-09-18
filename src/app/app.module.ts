@@ -1,22 +1,39 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
+import {FormsModule} from '@angular/forms';
 
-import { AppComponent } from './app.component';
-import { SigninComponent } from './auth/signin/signin.component';
-import { SignupComponent } from './auth/signup/signup.component';
+import {AppComponent} from './app.component';
+import {AuthComponent} from './auth/auth.component';
 
-import { MdInputModule, MdButtonModule, MdIconModule } from '@angular/material'
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { TokenInterceptor } from './auth/token.interceptor';
-import { AuthService } from './auth/auth.service';
+import {
+  MdButtonModule,
+  MdCardModule,
+  MdIconModule,
+  MdInputModule,
+  MdListModule, MdMenuModule,
+  MdToolbarModule
+} from '@angular/material';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
+import {TokenInterceptor} from './auth/token.interceptor';
+
+import {RouterModule, Routes} from '@angular/router';
+import {ChatComponent} from './chat/chat.component';
+
+import {StompService} from 'ng2-stomp-service';
+import {FlexLayoutModule} from '@angular/flex-layout';
+import {AccessGuardService} from './auth/access-guard.service';
+
+const router: Routes = [
+  { path: 'messages', component: ChatComponent, canActivate: [AccessGuardService] },
+  { path: '', component: AuthComponent }
+];
 
 @NgModule({
   declarations: [
     AppComponent,
-    SigninComponent,
-    SignupComponent
+    AuthComponent,
+    ChatComponent
   ],
   imports: [
     BrowserModule,
@@ -25,9 +42,15 @@ import { AuthService } from './auth/auth.service';
     FormsModule,
     MdInputModule,
     MdButtonModule,
-    MdIconModule
+    MdIconModule,
+    MdListModule,
+    MdCardModule,
+    MdToolbarModule,
+    MdMenuModule,
+    FlexLayoutModule,
+    RouterModule.forRoot(router)
   ],
-  providers: [{
+  providers: [StompService, AccessGuardService, {
     provide: HTTP_INTERCEPTORS,
     useClass: TokenInterceptor,
     multi: true,

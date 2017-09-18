@@ -14,8 +14,7 @@ import {
   MdToolbarModule
 } from '@angular/material';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
-import {TokenInterceptor} from './auth/token.interceptor';
+import {HttpClientModule} from '@angular/common/http';
 
 import {RouterModule, Routes} from '@angular/router';
 import {ChatComponent} from './chat/chat.component';
@@ -23,6 +22,7 @@ import {ChatComponent} from './chat/chat.component';
 import {StompService} from 'ng2-stomp-service';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {AccessGuardService} from './auth/access-guard.service';
+import {AuthService} from './auth/auth.service';
 
 const router: Routes = [
   { path: 'messages', component: ChatComponent, canActivate: [AccessGuardService] },
@@ -50,11 +50,7 @@ const router: Routes = [
     FlexLayoutModule,
     RouterModule.forRoot(router)
   ],
-  providers: [StompService, AccessGuardService, {
-    provide: HTTP_INTERCEPTORS,
-    useClass: TokenInterceptor,
-    multi: true,
-  }],
+  providers: [StompService, AccessGuardService, AuthService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

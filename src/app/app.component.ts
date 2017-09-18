@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {AuthService, Store} from './auth/auth.service';
+import {AuthService} from './auth/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -9,14 +9,9 @@ import {AuthService, Store} from './auth/auth.service';
 })
 export class AppComponent {
 
-  get isAuthenticated(): boolean {
-    return Store.isAuthenticated;
-  }
+  readonly authService: AuthService;
 
-  constructor(private readonly authService: AuthService) {
-  }
-
-  signOut() {
-    this.authService.signOut();
+  constructor(authService: AuthService) {
+    this.authService = authService;
   }
 }

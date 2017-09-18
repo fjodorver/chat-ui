@@ -3,7 +3,8 @@ import {ChatService} from './chat.service';
 import {NgForm} from '@angular/forms';
 import {MessageModel} from './message.model';
 import {UserModel} from '../auth/user.model';
-import {ConnectionModel, Status} from './connection.model';
+import {ConnectionModel} from './connection.model';
+import {AuthService} from '../auth/auth.service';
 
 @Component({
   selector: 'app-chat',
@@ -13,12 +14,15 @@ import {ConnectionModel, Status} from './connection.model';
 })
 export class ChatComponent {
 
-  readonly messages: MessageModel[] = [];
+  private readonly chatService: ChatService;
 
-  readonly users: UserModel[] = [];
+  messages: MessageModel[] = [];
 
-  constructor(private readonly chatService: ChatService) {
-    this.run(chatService);
+  users: UserModel[] = [];
+
+  constructor(authService: AuthService, chatService: ChatService) {
+    this.chatService = chatService;
+    this.run(authService, chatService);
   }
 
   onSend(form: NgForm) {
@@ -27,11 +31,12 @@ export class ChatComponent {
     form.reset();
   }
 
-  private async run(chatService: ChatService) {
+  private async run(authService: AuthService, chatService: ChatService) {
     await chatService.connect();
-    chatService.onConnect.subscribe(it => this.onConnectionStatus(it));
+    this.messages = await authService.get<MessageModel[]>('http://localhost:8080/api/v1/messages/');
+    this.users = await authService.get<UserModel[]>('http://localhost:8080/api/v1/users/');
     chatService.onMessage.subscribe(it => this.messages.push(it));
-    chatService.onUser.subscribe(it => this.users.push(it));
+    chatService.onConnect.subscribe(it => this.onConnectionStatus(it));
   }
 
   private onConnectionStatus(model: ConnectionModel) {

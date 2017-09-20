@@ -42,7 +42,7 @@
 <nav class="navbar-fixed-bottom">
   <form (submit)="onSend()" #msgForm="ngForm">
     <div class="input-group bottom">
-      <input name="content" [(ngModel)]="model.content" type="text" class="form-control" placeholder="Message">
+      <input name="content" [(ngModel)]="model.content" autocomplete="off" type="text" class="form-control" placeholder="Message">
       <span class="input-group-btn">
           <button class="btn btn-default" type="submit">Send</button>
         </span>

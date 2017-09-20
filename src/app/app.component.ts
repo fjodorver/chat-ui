@@ -14,6 +14,10 @@ export class AppComponent {
 
   private readonly router: Router;
 
+  get isAuthorized(): boolean {
+    return this.authService.isAuthorized;
+  }
+
   constructor(authService: AuthService, router: Router) {
     this.authService = authService;
     this.router = router;

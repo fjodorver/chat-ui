@@ -1,5 +1,6 @@
 import {Component} from '@angular/core';
-import {AuthService} from './auth/auth.service';
+import {AuthService} from './remote/auth/auth.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -9,9 +10,20 @@ import {AuthService} from './auth/auth.service';
 })
 export class AppComponent {
 
-  readonly authService: AuthService;
+  private readonly authService: AuthService;
 
-  constructor(authService: AuthService) {
+  private readonly router: Router;
+
+  constructor(authService: AuthService, router: Router) {
     this.authService = authService;
+    this.router = router;
+  }
+
+  logout() {
+    this.authService.signOut();
+  }
+
+  getActive(url: string): string {
+    return (this.router.url === url) ? 'active' : '';
   }
 }

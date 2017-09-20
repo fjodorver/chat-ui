@@ -1,7 +1,7 @@
-import {UserModel} from '../auth/user.model';
+import {UserModel} from '../remote/auth/user.model';
 
 export class MessageModel {
-  readonly content: string;
+  content: string;
   readonly user?: UserModel;
 
   constructor(content: string, user?: UserModel) {

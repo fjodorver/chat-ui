@@ -1,10 +1,12 @@
-import {Injectable,} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/toPromise';
 import {UserModel} from './user.model';
 import {Router} from '@angular/router';
 import {StompService} from 'ng2-stomp-service';
+
+const CREDENTIALS = btoa('client_id:secret');
 
 @Injectable()
 export class AuthService {
@@ -34,21 +36,6 @@ export class AuthService {
     this.isAuthorized = this.token !== undefined;
   }
 
-  get<T>(url: string): Promise<T> {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${this.token}`
-    });
-    return this.http.get<T>(url, {headers: headers}).toPromise();
-  }
-
-  post<T>(url: string, body?: any, params?: HttpParams): Promise<T> {
-    const credentials = btoa('client_id:secret');
-    const headers = new HttpHeaders({
-      Authorization: (this.isAuthorized) ? `Bearer ${this.token}` : `Basic ${credentials}`
-    });
-    return this.http.post<T>(url, body, {params: params, headers: headers}).toPromise();
-  }
-
   async signUp(user: UserModel) {
     const url = 'http://localhost:8080/signup';
     await this.post(url, user);
@@ -56,28 +43,51 @@ export class AuthService {
   }
 
   async signIn(user: UserModel) {
+    const url = 'http://localhost:8080/oauth/token';
     const params = new HttpParams()
       .append('grant_type', 'password')
       .append('username', user.username)
       .append('password', user.password);
-    try {
-      this.token = (await this.post('http://localhost:8080/oauth/token', params))['access_token'];
-      this.isAuthorized = true;
-      this.router.navigate(['/messages']);
-    } catch (e) {
-      console.log(e);
-    }
+    this.token = (await this.post(url, user, params))['access_token'];
+    this.isAuthorized = true;
+    this.router.navigate(['/chat']);
   }
+
+  async trySignIn() {
+    const url = 'http://localhost:8080/api/v1/me';
+    await this.get<UserModel>(url);
+    this.router.navigate(['/chat']);
+  };
 
   async signOut() {
     const url = `http://localhost:8080/oauth/token/${this.token}`;
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${this.token}`
+    try {
+      await this.stomp.disconnect();
+      await this.http.delete(url, {headers: this.headers(), responseType: 'text'}).toPromise();
+    } finally {
+      localStorage.clear();
+      this.isAuthorized = false;
+      this.router.navigate(['/']);
+    }
+  }
+
+  private get<T>(url: string, params?: HttpParams): Promise<T> {
+    return this.http.get<T>(url, {
+      headers: this.headers(),
+      params: params
+    }).toPromise();
+  }
+
+  private post<T>(url: string, model?: any, params?: HttpParams): Promise<T> {
+    return this.http.post<T>(url, model, {
+      headers: this.headers(),
+      params: params
+    }).toPromise();
+  }
+
+  private headers(): HttpHeaders {
+    return new HttpHeaders({
+      Authorization: (this.isAuthorized) ? `Bearer ${this.token}` : `Basic ${CREDENTIALS}`
     });
-    await this.stomp.disconnect();
-    await this.http.delete(url, {headers: headers, responseType: 'text'}).toPromise();
-    this.isAuthorized = false;
-    localStorage.clear();
-    this.router.navigate(['/']);
   }
 }

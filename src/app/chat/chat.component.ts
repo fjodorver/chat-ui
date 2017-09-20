@@ -1,56 +1,37 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ChatService} from './chat.service';
-import {NgForm} from '@angular/forms';
 import {MessageModel} from './message.model';
-import {UserModel} from '../auth/user.model';
-import {ConnectionModel} from './connection.model';
-import {AuthService} from '../auth/auth.service';
+import {Observable} from 'rxjs/Observable';
+import {UserModel} from '../remote/auth/user.model';
 
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.css'],
   providers: [ChatService]
 })
-export class ChatComponent {
+export class ChatComponent implements OnInit {
 
   private readonly chatService: ChatService;
 
-  messages: MessageModel[] = [];
+  readonly messages: MessageModel[] = [];
 
-  users: UserModel[] = [];
+  users: Observable<UserModel[]>;
 
-  constructor(authService: AuthService, chatService: ChatService) {
+  model = new MessageModel('');
+
+  constructor(chatService: ChatService) {
     this.chatService = chatService;
-    this.run(authService, chatService);
   }
 
-  onSend(form: NgForm) {
-    const message = form.value.message;
-    this.chatService.sendMessage(message);
-    form.reset();
+  onSend() {
+    this.chatService.sendMessage(this.model);
+    this.model.content = '';
   }
 
-  private async run(authService: AuthService, chatService: ChatService) {
-    await chatService.connect();
-    this.messages = await authService.get<MessageModel[]>('http://localhost:8080/api/v1/messages/');
-    this.users = await authService.get<UserModel[]>('http://localhost:8080/api/v1/users/');
-    chatService.onMessage.subscribe(it => this.messages.push(it));
-    chatService.onConnect.subscribe(it => this.onConnectionStatus(it));
-  }
-
-  private onConnectionStatus(model: ConnectionModel) {
-    switch (model.status.toString()) {
-      case 'CONNECTED':
-        this.users.push(model.user);
-        break;
-      case 'DISCONNECTED':
-        this.users.forEach((user, i) => {
-          if (model.user.id === user.id) {
-            this.users.splice(i, 1);
-          }
-        });
-        break;
-    }
+  async ngOnInit() {
+    await this.chatService.connect();
+    this.users = this.chatService.getUsers();
+    this.chatService.onMessage()
+      .subscribe(it => this.messages.push(it));
   }
 }

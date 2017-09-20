@@ -1,7 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {AuthService} from './auth.service';
 import {UserModel} from './user.model';
-import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-auth',
@@ -10,16 +9,23 @@ import {Router} from '@angular/router';
 })
 export class AuthComponent implements OnInit {
 
+  private readonly authService: AuthService;
+
   readonly model = new UserModel(null, '', '');
 
   isError = false;
 
-  constructor(private readonly authService: AuthService, private readonly router: Router) {
+  constructor(authService: AuthService) {
+    this.authService = authService;
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     if (this.authService.isAuthorized) {
-      this.router.navigate(['/messages']);
+      try {
+        await this.authService.trySignIn();
+      } catch (e) {
+        await this.authService.signOut();
+      }
     }
   }
 

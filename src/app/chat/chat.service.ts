@@ -4,40 +4,53 @@ import {MessageModel} from './message.model';
 import {StompService} from 'ng2-stomp-service';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/concat';
-import {ConnectionModel} from './connection.model';
-import {AuthService} from '../auth/auth.service';
+import {AuthService} from '../remote/auth/auth.service';
+import {RemoteService} from '../remote/remote.service';
+import {UserModel} from '../remote/auth/user.model';
 
 @Injectable()
 export class ChatService {
 
-  readonly onConnect: Observable<ConnectionModel>;
+  private readonly remote: RemoteService;
 
-  readonly onMessage: Observable<MessageModel>;
+  private readonly stomp: StompService;
 
-  constructor(private readonly authService: AuthService, private readonly stomp: StompService) {
+  constructor(authService: AuthService, stomp: StompService, remote: RemoteService) {
     stomp.configure({
-      host: `http://localhost:8080/websocket/?access_token=${this.authService.token}`,
+      host: `http://localhost:8080/websocket/?access_token=${authService.token}`,
       debug: true,
       queue: {
         init: true
       }
     });
-    this.onConnect = this.channelObserve<ConnectionModel>(stomp, '/users/receive');
-    this.onMessage = this.channelObserve<MessageModel>(stomp, '/messages/receive');
+    this.stomp = stomp;
+    this.remote = remote;
   }
 
   async connect() {
     return this.stomp.startConnect();
   }
 
-  sendMessage(content: string) {
-    const message = new MessageModel(content, null);
-    this.stomp.send('/app/send', message);
+  getUsers(): Observable<UserModel[]> {
+    return this.channelObserve<UserModel[]>('/users/receive');
   }
 
-  private channelObserve<T>(stomp: StompService, url: string): Observable<T> {
+  getMessages(): Observable<MessageModel[]> {
+    return this.remote.get<MessageModel[]>('http://localhost:8080/api/v1/messages/');
+  }
+
+  onMessage(): Observable<MessageModel> {
+    return this.channelObserve<MessageModel>('/messages/receive');
+  }
+
+  sendMessage(messageModel: MessageModel) {
+    this.stomp.send('/app/send', messageModel);
+  }
+
+  private channelObserve<T>(url: string): Observable<T> {
     return Observable.create(emitter => {
-      stomp.subscribe(url, model => emitter.next(model));
+      this.stomp.subscribe(url, model => emitter.next(model));
+      this.stomp.send('/app/getMessages', {});
     });
   }
 }

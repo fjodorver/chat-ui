@@ -1,19 +1,51 @@
-<div #list class="msg-list" [scrollTop]="list.scrollHeight" fxFlex="80%">
-  <md-list>
-    <md-list-item *ngFor="let it of messages">
-      <p>{{it.user.username}}: {{it.content}}</p>
-    </md-list-item>
-  </md-list>
+<div class="row">
+  <div class="col-lg-9">
+    <div *ngIf="messages.length > 0" class="panel panel-default">
+      <div class="panel-body">
+        <ul class="media-list">
+          <li class="media" *ngFor="let it of messages">
+            <div class="media-body">
+              <div class="media">
+                <div class="pull-left ">
+                  <md-icon>account_circle</md-icon>
+                </div>
+                <div class="media-body" >{{it.content}}
+                  <br />
+                  <small class="text-muted">{{it.user?.username}}</small>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-3">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        Users
+      </div>
+      <div class="panel-body">
+        <ul class="media-list">
+          <li class="media" *ngFor="let it of users|async">
+            <div class="media">
+              <div class="media-body">
+                <h5>{{it.username}}</h5>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
 </div>
-<div #userList class="msg-list" [scrollTop]="userList.scrollHeight" fxFlex="20%">
-  <md-list>
-    <md-list-item *ngFor="let it of users">
-      <p>{{it.username}}</p>
-    </md-list-item>
-  </md-list>
-</div>
-<form class="form" (ngSubmit)="onSend(f)" #f="ngForm">
-  <md-form-field fxFlex="100%">
-    <input name="message" autocomplete="off" mdInput ngModel placeholder="Message">
-  </md-form-field>
-</form>
+<nav class="navbar-fixed-bottom">
+  <form (submit)="onSend()" #msgForm="ngForm">
+    <div class="input-group bottom">
+      <input name="content" [(ngModel)]="model.content" type="text" class="form-control" placeholder="Message">
+      <span class="input-group-btn">
+          <button class="btn btn-default" type="submit">Send</button>
+        </span>
+    </div>
+  </form>
+</nav>

@@ -1,28 +1,24 @@
-<div fxLayoutAlign="center center">
-  <md-card>
-    <md-card-title>Authentication</md-card-title>
-    <md-card-subtitle>Please, enter your username and password</md-card-subtitle>
-    <md-card-content>
-      <div align="left" fxFill>
-        <md-input-container fxFill>
-          <input mdInput [(ngModel)]="model.username" type="text" placeholder="Username">
-        </md-input-container>
-        <br/>
-        <md-input-container fxFill>
-          <input mdInput [(ngModel)]="model.password" type="password" placeholder="Password">
-        </md-input-container>
+<form class="form-horizontal">
+    <div *ngIf="isError" class="alert alert-danger">
+      <strong>Error!</strong> Bad credeteionals..
+    </div>
+    <div class="form-group">
+      <label class="col-md-4 control-label" for="username">Username</label>
+      <div class="col-md-4">
+        <input id="username" name="username" [(ngModel)]="model.username" type="text" placeholder="Username" class="form-control input-md" required>
       </div>
-      <div *ngIf="isError">
-        <p style="color: red">Error</p>
+    </div>
+    <div class="form-group">
+      <label class="col-md-4 control-label" for="password">Password</label>
+      <div class="col-md-4">
+        <input id="password" name="password" [(ngModel)]="model.password"type="password" placeholder="Password" class="form-control input-md" required>
       </div>
-    </md-card-content>
-    <md-card-actions align="right">
-      <button md-raised-button (click)="onSignUp()" color="warn" type="submit">
-        <md-icon>check</md-icon> Sign Up
-      </button>
-      <button md-raised-button (click)="onSignIn()" color="primary" type="submit">
-        <md-icon>check</md-icon> Sign In
-      </button>
-    </md-card-actions>
-  </md-card>
-</div>
+    </div>
+    <div class="form-group">
+      <label class="col-md-4 control-label" for="signin"></label>
+      <div class="col-md-8">
+        <button id="signin" (click)="onSignIn()" type="submit" class="btn btn-success">Sign In</button>
+        <button id="signup" (click)="onSignUp()" type="submit" class="btn btn-danger">Sign Up</button>
+      </div>
+    </div>
+</form>

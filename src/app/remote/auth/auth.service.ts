@@ -57,13 +57,13 @@ export class AuthService {
     const url = 'http://localhost:8080/api/v1/me';
     await this.get<UserModel>(url);
     this.router.navigate(['/chat']);
-  };
+  }
 
   async signOut() {
-    const url = `http://localhost:8080/oauth/token/${this.token}`;
+    const url = `http://localhost:8080/signout`;
     try {
       await this.stomp.disconnect();
-      await this.http.delete(url, {headers: this.headers(), responseType: 'text'}).toPromise();
+      await this.get(url);
     } finally {
       localStorage.clear();
       this.isAuthorized = false;
